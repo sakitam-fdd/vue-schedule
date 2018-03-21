@@ -1,0 +1,82 @@
+{
+  "name": "@sakitam-fdd/vue-schedule",
+  "version": "0.0.1",
+  "description": "A vue schedule components",
+  "homepage": "https://sakitam-fdd.github.io/vue-schedule/",
+  "keywords": [
+    "vue",
+    "vue.js",
+    "component",
+    "calendar",
+    "schedule"
+  ],
+  "main": "dist/vue-schedule.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "webpack --config build/webpack.dev.conf.js",
+    "build": "webpack --config build/webpack.prod.conf.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sakitam-fdd/vue-schedule"
+  },
+  "author": "FDD <smileFDD@gmail.com>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/sakitam-fdd/vue-schedule/issues"
+  },
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "vue": "^2.5.16"
+  },
+  "devDependencies": {
+    "autoprefixer": "^8.1.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.2",
+    "babel-helper-vue-jsx-merge-props": "^2.0.3",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-syntax-jsx": "^6.18.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-plugin-transform-vue-jsx": "^3.7.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "css-loader": "^0.28.11",
+    "eslint": "^4.19.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-friendly-formatter": "^3.0.0",
+    "eslint-loader": "^2.0.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "eslint-plugin-vue": "^4.3.0",
+    "file-loader": "^1.1.11",
+    "friendly-errors-webpack-plugin": "^1.6.1",
+    "node-sass": "^4.7.2",
+    "optimize-css-assets-webpack-plugin": "^3.2.0",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "postcss-loader": "^2.1.3",
+    "postcss-import": "^11.1.0",
+    "postcss-url": "^7.3.1",
+    "sass-loader": "^6.0.7",
+    "uglifyjs-webpack-plugin": "^1.2.4",
+    "url-loader": "^1.0.1",
+    "vue-loader": "^14.2.1",
+    "vue-style-loader": "^4.0.2",
+    "vue-template-compiler": "^2.5.16",
+    "webpack": "^4.1.1",
+    "webpack-bundle-analyzer": "^2.11.1",
+    "webpack-cli": "^2.0.12",
+    "webpack-dev-server": "^3.1.1",
+    "webpack-merge": "^4.1.2"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}
