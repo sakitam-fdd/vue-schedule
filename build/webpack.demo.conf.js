@@ -17,7 +17,6 @@ utils.setSourceMap(true);
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   mode: 'development',
-  // watch: true,
   entry: {
     app: './examples/main.js'
   },

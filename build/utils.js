@@ -5,10 +5,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 let [extract, sourceMap] = [false, false];
 
 exports.assetsPath = function (_path) {
-  const assetsSubDirectory = process.env.type === 'demo'
-    ? 'static'
-    : '';
-  return path.posix.join(assetsSubDirectory, _path)
+  return path.posix.join('', _path)
 };
 
 exports.cssLoaders = function (options) {

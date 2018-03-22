@@ -1,9 +1,9 @@
 'use strict'
+const rm = require('rimraf');
 const path = require('path');
 const utils = require('./utils');
 const webpack = require('webpack');
 const merge = require('webpack-merge');
-const baseWebpackConfig = require('./webpack.base.conf');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
@@ -12,9 +12,9 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 utils.setExtract(true);
-utils.setSourceMap(false);
+utils.setSourceMap(true);
 
-const webpackConfig = merge(baseWebpackConfig, {
+const webpackConfig = merge(require('./webpack.base.conf'), {
   mode: 'production',
   module: {
     rules: utils.styleLoaders({
@@ -82,7 +82,9 @@ const webpackConfig = merge(baseWebpackConfig, {
         ignore: ['.*']
       }
     ]),
-    new BundleAnalyzerPlugin()
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static'
+    })
   ],
   optimization: {
     // chunk for the webpack runtime code and chunk manifest
@@ -102,4 +104,9 @@ const webpackConfig = merge(baseWebpackConfig, {
   }
 });
 
-module.exports = webpackConfig
+module.exports = new Promise((resolve, reject) => {
+  rm(path.join(path.resolve(__dirname, '../demoDist')), err => {
+    if (err) throw err;
+    resolve(webpackConfig)
+  })
+});

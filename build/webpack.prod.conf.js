@@ -1,7 +1,6 @@
 'use strict'
 const utils = require('./utils');
 const merge = require('webpack-merge');
-const baseWebpackConfig = require('./webpack.base.conf');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
@@ -10,7 +9,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 utils.setExtract(true);
 utils.setSourceMap(true);
 
-const webpackConfig = merge(baseWebpackConfig, {
+const webpackConfig = merge(require('./webpack.base.conf'), {
   mode: 'production',
   module: {
     rules: utils.styleLoaders({
@@ -47,7 +46,9 @@ const webpackConfig = merge(baseWebpackConfig, {
         }
       }
     }),
-    new BundleAnalyzerPlugin()
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static'
+    })
   ],
   externals: {
     vue: {
