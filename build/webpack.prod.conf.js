@@ -1,12 +1,14 @@
 'use strict'
-const utils = require('./utils')
-const merge = require('webpack-merge')
-const baseWebpackConfig = require('./webpack.base.conf')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const utils = require('./utils');
+const merge = require('webpack-merge');
+const baseWebpackConfig = require('./webpack.base.conf');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+utils.setExtract(true);
+utils.setSourceMap(true);
 
 const webpackConfig = merge(baseWebpackConfig, {
   mode: 'production',
@@ -46,23 +48,15 @@ const webpackConfig = merge(baseWebpackConfig, {
       }
     }),
     new BundleAnalyzerPlugin()
-  ]
-  // optimization: {
-  //   // chunk for the webpack runtime code and chunk manifest
-  //   runtimeChunk: {
-  //     name: 'manifest'
-  //   },
-  //   splitChunks: {
-  //     cacheGroups: {
-  //       vendors: {
-  //         test: /[\\/]node_modules[\\/]/,
-  //         name: 'vendors',
-  //         priority: -20,
-  //         chunks: 'all'
-  //       }
-  //     }
-  //   }
-  // }
+  ],
+  externals: {
+    vue: {
+      root: 'Vue',
+      commonjs: 'vue',
+      commonjs2: 'vue',
+      amd: 'vue'
+    }
+  }
 })
 
 module.exports = webpackConfig

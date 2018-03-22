@@ -1,10 +1,6 @@
 'use strict'
-const path = require('path')
-const utils = require('./utils')
-
-function resolve (dir) {
-  return path.join(__dirname, '..', dir)
-}
+const path = require('path');
+const utils = require('./utils');
 
 module.exports = {
   context: path.resolve(__dirname, '../'),
@@ -23,7 +19,7 @@ module.exports = {
     extensions: ['.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src'),
+      '@': utils.resolve('src'),
     }
   },
   module: {
@@ -32,7 +28,10 @@ module.exports = {
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',
         enforce: 'pre',
-        include: [resolve('src'), resolve('test')],
+        include: [
+          utils.resolve('src'),
+          utils.resolve('examples')
+        ],
         options: {
           formatter: require('eslint-friendly-formatter'),
           emitWarning: true
@@ -43,10 +42,11 @@ module.exports = {
         loader: 'vue-loader',
         options: {
           loaders: utils.cssLoaders({
-            sourceMap: true,
-            extract: true
+            sourceMap: utils.getSourceMap(),
+            extract: utils.getExtract()
           }),
-          cssSourceMap: true,
+          cssSourceMap: utils.getSourceMap(),
+          cacheBusting: true,
           transformToRequire: {
             video: ['src', 'poster'],
             source: 'src',
@@ -58,7 +58,11 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')]
+        include: [
+          utils.resolve('src'),
+          utils.resolve('examples'),
+          utils.resolve('node_modules/webpack-dev-server/client')
+        ]
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -85,14 +89,6 @@ module.exports = {
         }
       }
     ]
-  },
-  externals: {
-    vue: {
-      root: 'Vue',
-      commonjs: 'vue',
-      commonjs2: 'vue',
-      amd: 'vue'
-    }
   },
   node: {
     // prevent webpack from injecting useless setImmediate polyfill because Vue

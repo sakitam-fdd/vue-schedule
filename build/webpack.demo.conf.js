@@ -1,18 +1,39 @@
 'use strict'
-const utils = require('./utils')
-const webpack = require('webpack')
-const merge = require('webpack-merge')
-const path = require('path')
-const baseWebpackConfig = require('./webpack.demo.base.conf')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
-const portfinder = require('portfinder')
+const path = require('path');
+const utils = require('./utils');
+const webpack = require('webpack');
+const portfinder = require('portfinder');
+const merge = require('webpack-merge');
+const baseWebpackConfig = require('./webpack.base.conf');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
 
-const HOST = process.env.HOST
-const PORT = process.env.PORT && Number(process.env.PORT)
+const HOST = process.env.HOST;
+const PORT = process.env.PORT && Number(process.env.PORT);
+
+utils.setExtract(false);
+utils.setSourceMap(true);
 
 const devWebpackConfig = merge(baseWebpackConfig, {
+  mode: 'development',
+  // watch: true,
+  entry: {
+    app: './examples/main.js'
+  },
+  output: {
+    path: path.resolve(__dirname, '../demoDist'),
+    filename: '[name].js',
+    publicPath: '/',
+    library: undefined,
+    libraryTarget: 'var',
+    umdNamedDefine: false
+  },
+  resolve: {
+    alias: {
+      '@': utils.resolve('examples'),
+    }
+  },
   module: {
     rules: utils.styleLoaders({
       sourceMap: true,
@@ -20,7 +41,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     })
   },
   // cheap-module-eval-source-map is faster for development
-  devtool: config.dev.devtool,
+  devtool: '#cheap-module-eval-source-map',
 
   // these devServer options should be customized in /config/index.js
   devServer: {
@@ -45,8 +66,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
-    new webpack.NoEmitOnErrorsPlugin(),
     // https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
       filename: 'index.html',
@@ -62,7 +81,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       }
     ])
   ]
-})
+});
 
 module.exports = new Promise((resolve, reject) => {
   portfinder.basePort = process.env.PORT || 3456
@@ -71,18 +90,16 @@ module.exports = new Promise((resolve, reject) => {
       reject(err)
     } else {
       // publish the new Port, necessary for e2e tests
-      process.env.PORT = port
+      process.env.PORT = port;
       // add port to devServer config
-      devWebpackConfig.devServer.port = port
-
+      devWebpackConfig.devServer.port = port;
       // Add FriendlyErrorsPlugin
       devWebpackConfig.plugins.push(new FriendlyErrorsPlugin({
         compilationSuccessInfo: {
           messages: [`Your application is running here: http://${devWebpackConfig.devServer.host}:${port}`],
         },
         onErrors: undefined
-      }))
-
+      }));
       resolve(devWebpackConfig)
     }
   })

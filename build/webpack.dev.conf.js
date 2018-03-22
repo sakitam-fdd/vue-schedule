@@ -7,6 +7,9 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 
+utils.setExtract(true);
+utils.setSourceMap(true);
+
 const devWebpackConfig = merge(baseWebpackConfig, {
   mode: 'development',
   module: {
@@ -21,7 +24,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   watch: true,
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin(),
     // extract css into its own file
     new ExtractTextPlugin({
       filename: 'vue-schedule.css',
@@ -36,7 +38,15 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       }
     }),
     new FriendlyErrorsPlugin()
-  ]
+  ],
+  externals: {
+    vue: {
+      root: 'Vue',
+      commonjs: 'vue',
+      commonjs2: 'vue',
+      amd: 'vue'
+    }
+  }
 })
 
 module.exports = devWebpackConfig
