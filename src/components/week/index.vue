@@ -50,10 +50,10 @@
     data () {
       return {
         tables: [],
-        insideYear: 0,
-        insideMonth: 0,
-        insideWeek: 0,
-        insideDay: 0
+        currentYear: 0, // 当前年份
+        currentMonth: 0, // 当前月份
+        currentWeek: 0, // 当前周数
+        currentDay: 0 // 当前日期
       }
     },
     watch: {
@@ -65,21 +65,27 @@
       this.init()
     },
     methods: {
-      init () {
-        const now = new Date()
-        this.insideYear = now.getFullYear()
-        this.insideMonth = now.getMonth()
-        this.insideDay = now.getDate()
-        if (this.value.length > 0) {
-          this.insideYear = parseInt(this.value[0])
-          this.insideMonth = parseInt(this.value[1]) - 1
-          this.insideDay = parseInt(this.value[2])
+      calcTimer () {
+        if (Array.isArray(this.value) && this.value.length > 0) {
+          this.currentYear = parseInt(this.value[0]);
+          this.currentMonth = parseInt(this.value[1]) - 1;
+          this.currentDay = parseInt(this.value[2]);
         }
-        this.render(this.insideYear, this.insideMonth, this.insideDay)
+      },
+      init () {
+        const now = new Date();
+        this.currentYear = now.getFullYear();
+        this.currentMonth = now.getMonth();
+        this.currentDay = now.getDate();
+        if (this.value.length > 0) {
+          this.currentYear = parseInt(this.value[0]);
+          this.currentMonth = parseInt(this.value[1]) - 1;
+          this.currentDay = parseInt(this.value[2]);
+        }
+        this.render(this.currentYear, this.currentMonth, this.currentDay)
       },
       // 渲染日期
       render (year, month, day) {
-        console.log(year, month, day)
         const days = []
         const currentTime = new Date(year, month, day)
         const chk = new Date()
@@ -119,8 +125,8 @@
         )
       },
       computedWeeks () {
-        let value = this.insideYear
-        if (this.insideMonth + 1 > 11) {
+        let value = this.currentYear
+        if (this.currentMonth + 1 > 11) {
           value++
         }
         return value
@@ -128,9 +134,9 @@
       // 选中日期
       select (k1, k2, child, e) {
         if (e !== undefined) e.stopPropagation()
-        this.insideDay = this.days[k1][k2].day
+        this.currentDay = this.days[k1][k2].day
         this.today = [k1, k2]
-        const clickDay = [this.insideYear, this.zero ? this.zeroPad(this.insideMonth + 1) : this.insideMonth + 1, this.zero ? this.zeroPad(this.days[k1][k2].day) : this.days[k1][k2].day]
+        const clickDay = [this.currentYear, this.zero ? this.zeroPad(this.currentMonth + 1) : this.currentMonth + 1, this.zero ? this.zeroPad(this.days[k1][k2].day) : this.days[k1][k2].day]
         if (child.addAble && (!child.persons || child.persons.length === 0)) { // 只有可添加的才能触发事件
           this.$emit('select', clickDay, child)
         }

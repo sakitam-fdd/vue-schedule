@@ -2,11 +2,23 @@
 
 /**
  * @1900-2100区间内的公历、农历互转
- * @Version 1.0.2
+ * @charset UTF-8
+ * @Author  Jea杨(JJonline@JJonline.Cn)
+ * @Time    2014-7-21
+ * @Time    2016-8-13 Fixed 2033hex、Attribution Annals
+ * @Time    2016-9-25 Fixed lunar LeapMonth Param Bug
+ * @Time    2017-7-24 Fixed use getTerm Func Param Error.use solar year,NOT lunar year
+ * @Version 1.0.3
  * @公历转农历：calendar.solar2lunar(1987,11,01); //[you can ignore params of prefix 0]
  * @农历转公历：calendar.lunar2solar(1987,09,10); //[you can ignore params of prefix 0]
  */
-const calendar = {
+var calendar = {
+
+  /**
+   * 农历1900-2100的润大小信息表
+   * @Array Of Property
+   * @return Hex
+   */
   lunarInfo: [0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,//1900-1909
     0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,//1910-1919
     0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970,//1920-1929
@@ -385,20 +397,25 @@ const calendar = {
    * @eg:console.log(calendar.solar2lunar(1987,11,01));
    */
   solar2lunar: function (y, m, d) { //参数区间1900.1.31~2100.12.31
+    //年份限定、上限
     if (y < 1900 || y > 2100) {
-      return -1;
-    }//年份限定、上限
+      return -1;// undefined转换为数字变为NaN
+    }
+    //公历传参最下限
     if (y == 1900 && m == 1 && d < 31) {
       return -1;
-    }//下限
-    if (!y) { //未传参  获得当天
+    }
+    //未传参  获得当天
+    if (!y) {
       var objDate = new Date();
     } else {
       var objDate = new Date(y, parseInt(m) - 1, d)
     }
     var i, leap = 0, temp = 0;
     //修正ymd参数
-    var y = objDate.getFullYear(), m = objDate.getMonth() + 1, d = objDate.getDate();
+    var y = objDate.getFullYear(),
+      m = objDate.getMonth() + 1,
+      d = objDate.getDate();
     var offset = (Date.UTC(objDate.getFullYear(), objDate.getMonth(), objDate.getDate()) - Date.UTC(1900, 0, 31)) / 86400000;
     for (i = 1900; i < 2101 && offset > 0; i++) {
       temp = calendar.lYearDays(i);
@@ -410,18 +427,20 @@ const calendar = {
     }
 
     //是否今天
-    var isTodayObj = new Date(), isToday = false;
+    var isTodayObj = new Date(),
+      isToday = false;
     if (isTodayObj.getFullYear() == y && isTodayObj.getMonth() + 1 == m && isTodayObj.getDate() == d) {
       isToday = true;
     }
     //星期几
-    var nWeek = objDate.getDay(), cWeek = calendar.nStr1[nWeek];
+    var nWeek = objDate.getDay(),
+      cWeek = calendar.nStr1[nWeek];
+    //数字表示周几顺应天朝周一开始的惯例
     if (nWeek == 0) {
       nWeek = 7;
-    }//数字表示周几顺应天朝周一开始的惯例
+    }
     //农历年
     var year = i;
-
     var leap = calendar.leapMonth(i); //闰哪个月
     var isLeap = false;
 
@@ -442,14 +461,15 @@ const calendar = {
       }
       offset -= temp;
     }
-
-    if (offset == 0 && leap > 0 && i == leap + 1)
+    // 闰月导致数组下标重叠取反
+    if (offset == 0 && leap > 0 && i == leap + 1) {
       if (isLeap) {
         isLeap = false;
       } else {
         isLeap = true;
         --i;
       }
+    }
     if (offset < 0) {
       offset += temp;
       --i;
@@ -458,16 +478,16 @@ const calendar = {
     var month = i;
     //农历日
     var day = offset + 1;
-
     //天干地支处理
     var sm = m - 1;
     var gzY = calendar.toGanZhiYear(year);
 
-    //月柱 1900年1月小寒以前为 丙子月(60进制12)
-    var firstNode = calendar.getTerm(year, (m * 2 - 1));//返回当月「节」为几日开始
-    var secondNode = calendar.getTerm(year, (m * 2));//返回当月「节」为几日开始
+    // 当月的两个节气
+    // bugfix-2017-7-24 11:03:38 use lunar Year Param `y` Not `year`
+    var firstNode = calendar.getTerm(y, (m * 2 - 1));//返回当月「节」为几日开始
+    var secondNode = calendar.getTerm(y, (m * 2));//返回当月「节」为几日开始
 
-    //依据12节气修正干支月
+    // 依据12节气修正干支月
     var gzM = calendar.toGanZhi((y - 1900) * 12 + m + 11);
     if (d >= firstNode) {
       gzM = calendar.toGanZhi((y - 1900) * 12 + m + 12);

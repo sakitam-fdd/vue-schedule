@@ -1,8 +1,6 @@
-import VueSchedule from './components';
 import VueScheduleWeek from './components/week'
 
 const components = [
-  VueSchedule,
   VueScheduleWeek
 ];
 
@@ -17,8 +15,7 @@ if (typeof window !== 'undefined' && window.Vue) {
   install(window.Vue);
 }
 
-module.exports = {
+export default {
+  install,
   ...components
 };
-
-module.exports.default = module.exports;

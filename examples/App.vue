@@ -3,7 +3,6 @@
     <vue-schedule-week :type="'week'"></vue-schedule-week>
   </div>
 </template>
-
 <script>
 
 export default {

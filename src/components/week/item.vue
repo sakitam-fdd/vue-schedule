@@ -109,12 +109,12 @@
         color: #ffffff;
         display: none;
       }
-      .icon-xuanze1 {
+      .icon-guangquanfangda {
         &:before {
           color: #f5cb37;
         }
       }
-      .icon-star {
+      .icon-wuye {
         &:before {
           color: #20a0ff;
         }
