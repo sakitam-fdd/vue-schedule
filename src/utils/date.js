@@ -1,4 +1,11 @@
-import { padStart } from '../utils'
+import {padStart, prettyUnit, isNumber} from '../utils'
+import {
+  MILLISECONDS_A_WEEK,
+  MILLISECONDS_A_DAY,
+  MILLISECONDS_A_HOUR,
+  MILLISECONDS_A_MINUTE,
+  MILLISECONDS_A_SECOND
+} from './constants';
 
 class Timer {
   static getOriginDate (params) {
@@ -11,6 +18,7 @@ class Timer {
     }
     return new Date(params)
   }
+
   constructor (options) {
     /**
      * 原始时间戳
@@ -78,11 +86,263 @@ class Timer {
   }
 
   /**
+   * 获取当前天所在周
+   * @param time
+   * @returns {Array}
+   */
+  getWeeks (time) {
+    const _weeks = [];
+    const _time = new Timer(time);
+    const currentDay = this.getWeek();
+    for (let _week = 0; _week < 7; _week++) {
+      let _day = this.getDay() - (currentDay - _week);
+      let _month = this.getMonth();
+      let _year = this.getYear();
+      if (!(_day > 0)) {
+        _month = _month - 1
+      }
+      if (!(_month >= 0)) {
+        _year = _year - 1
+      }
+      if (!(_day > 0)) {
+        _day = new Date(_year, _month + 1, 0).getDate() + _day;
+      }
+      // TODO 重新生成时间
+      _weeks.push({
+        time: this.toObject(),
+        week: this.getWeek(),
+        isBefore: this.isSame(_time)
+      })
+    }
+    return _weeks;
+  }
+
+  /**
+   * get year
+   * @returns {number}
+   */
+  getYear () {
+    return this._year;
+  }
+
+  /**
+   * get month
+   * @returns {number}
+   */
+  getMonth () {
+    return this._month;
+  }
+
+  /**
+   * get day
+   * @returns {number}
+   */
+  getDay () {
+    return this._day;
+  }
+
+  /**
+   * get day
+   * @returns {number}
+   */
+  getWeek () {
+    return this._week;
+  }
+
+  /**
+   * get houer
+   * @returns {number}
+   */
+  getHour () {
+    return this._hours;
+  }
+
+  /**
+   * get minutes
+   * @returns {number}
+   */
+  getMinute () {
+    return this._minutes;
+  }
+
+  /**
+   * get second
+   * @returns {number}
+   */
+  getSecond () {
+    return this._seconds;
+  }
+
+  /**
+   * get ms
+   * @returns {number}
+   */
+  getMillisecond () {
+    return this._ms;
+  }
+
+  /**
+   * get unix
+   * @returns {number}
+   */
+  getUnix () {
+    return Math.floor(this.valueOf() / 1000)
+  }
+
+  /**
+   * value
+   * @returns {number}
+   */
+  valueOf () {
+    return this._date.getTime();
+  }
+
+  /**
+   * 获取起始时间
+   * @param units
+   * @param isStartOf
+   * @returns {*}
+   */
+  startOf (units, isStartOf = true) {
+    const unit = prettyUnit(units);
+    const instanceFactory = (d, m, y = this._year) => {
+      const ins = new Timer(new Date(y, m, d));
+      return isStartOf ? ins : ins.endOf('day');
+    };
+    const instanceFactorySet = (method, slice) => {
+      const argumentStart = [0, 0, 0, 0];
+      const argumentEnd = [23, 59, 59, 999];
+      return new Timer(this.toDate()[method].apply(
+        this.toDate(),
+        isStartOf ? argumentStart.slice(slice) : argumentEnd.slice(slice)
+      ))
+    };
+    switch (unit) {
+      case 'year':
+        return isStartOf ? instanceFactory(1, 0) : instanceFactory(31, 11, this._year);
+      case 'month':
+        return isStartOf ? instanceFactory(1, this._month) : instanceFactory(0, this._month + 1, this._year);
+      case 'week':
+        return isStartOf ? instanceFactory(this._day - this._week, this._month)
+          : instanceFactory(this._day + (6 - this._week), this._month, this._year);
+      case 'day':
+      case 'date':
+        return instanceFactorySet('setHours', 0);
+      case 'hour':
+        return instanceFactorySet('setMinutes', 1);
+      case 'minute':
+        return instanceFactorySet('setSeconds', 2);
+      case 'second':
+        return instanceFactorySet('setMilliseconds', 3);
+      default:
+        return this.clone()
+    }
+  }
+
+  /**
+   * 获取结束时间
+   * @param arg
+   * @returns {*}
+   */
+  endOf (arg) {
+    return this.startOf(arg, false)
+  }
+
+  /**
+   * set time
+   * @param units
+   * @param int
+   * @returns {Timer}
+   */
+  mSet (units, int) {
+    const unit = prettyUnit(units);
+    switch (unit) {
+      case 'date':
+        this._date.setDate(int);
+        break;
+      case 'month':
+        this._date.setMonth(int);
+        break;
+      case 'year':
+        this._date.setFullYear(int);
+        break;
+      default:
+        break
+    }
+    return this
+  }
+
+  /**
+   * set string
+   * @param string
+   * @param int
+   * @returns {*}
+   */
+  set (string, int) {
+    if (!isNumber(int)) return this;
+    return this.clone().mSet(string, int)
+  }
+
+  /**
+   * add time
+   * @param number
+   * @param units
+   * @returns {*}
+   */
+  add (number, units) {
+    const unit = (units && units.length === 1) ? units : prettyUnit(units);
+    let step;
+    switch (unit) {
+      case 'month':
+        let date = this.set('date', 1).set('month', this._month + number);
+        date = date.set('date', Math.min(this._date, date.inMonth()));
+        return date;
+      case 'year':
+        return this.set('year', this._year + number);
+      case 'minute':
+        step = MILLISECONDS_A_MINUTE;
+        break;
+      case 'hour':
+        step = MILLISECONDS_A_HOUR;
+        break;
+      case 'day':
+        step = MILLISECONDS_A_DAY;
+        break;
+      case 'week':
+        step = MILLISECONDS_A_WEEK;
+        break;
+      default:
+        step = MILLISECONDS_A_SECOND;
+        break;
+    }
+    const nextTimeStamp = this.valueOf() + (number * step);
+    return new Timer(nextTimeStamp)
+  }
+
+  /**
+   * 减少时间
+   * @param number
+   * @param string
+   * @returns {*}
+   */
+  subtract (number, string) {
+    return this.add(number * -1, string)
+  }
+
+  /**
    * 是否闰年
    * @returns {boolean}
    */
   isLeapYear () {
-    return ((this._year % 4 === 0) && (this._year % 100 !== 0)) || (this._year % 400 === 0)
+    return ((this._year % 4 === 0) && (this._year % 100 !== 0)) || (this._year % 400 === 0);
+  }
+
+  /**
+   * check is in month
+   * @returns {number}
+   */
+  inMonth () {
+    return this.endOf('month')._day;
   }
 
   /**
@@ -154,18 +414,26 @@ class Timer {
 
   /**
    * 转换为Object
-   * @returns {{years: number, months: number, date: number, hours: number, minutes: number, seconds: number, milliseconds: number}}
+   * @returns {{years: number, months: number, week: number, hours: number, minutes: number, seconds: number, milliseconds: number}}
    */
   toObject () {
     return {
       years: this._year,
       months: this._month,
-      date: this._day,
+      week: this._day,
       hours: this._hours,
       minutes: this._minutes,
       seconds: this._seconds,
       milliseconds: this._ms
     }
+  }
+
+  /**
+   * to string
+   * @returns {string}
+   */
+  toString () {
+    return this._date.toUTCString();
   }
 }
 
