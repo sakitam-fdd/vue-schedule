@@ -28,6 +28,7 @@
 </template>
 <script>
   import { WEEKS } from '../../utils/constants';
+  import Timer from '../../utils/date'
   import { getCurrentTime } from '../../utils';
   import VueScheduleWeekItems from './item';
   export default {
@@ -82,54 +83,7 @@
           this.currentMonth = parseInt(this.value[1]) - 1;
           this.currentDay = parseInt(this.value[2]);
         }
-        this.render(this.currentYear, this.currentMonth, this.currentDay)
-      },
-      // 渲染日期
-      render (year, month, day) {
-        const days = []
-        const currentTime = new Date(year, month, day)
-        const chk = new Date()
-        const chkY = chk.getFullYear()
-        const chkM = chk.getMonth()
-        const chkD = chk.getDate()
-        if (currentTime) {
-          const currentDay = currentTime.getDay()
-          for (let _week = 0; _week < 7; _week++) {
-            let _day = currentTime.getDate() - (currentDay - _week)
-            let _month = currentTime.getMonth()
-            let _year = currentTime.getFullYear()
-            if (!(_day > 0)) {
-              _month = _month - 1
-            }
-            if (!(_month >= 0)) {
-              _year = _year - 1
-            }
-            if (!(_day > 0)) {
-              _day = new Date(_year, _month + 1, 0).getDate() + _day
-            }
-            const selected = (chkY === _year && chkM === _month && chkD === _day)
-            days.push(this.computedItem(_year, _month, _day, selected))
-          }
-        }
-        this.tables = days
-      },
-      // 计算每一项
-      computedItem (year, month, day, selected) {
-        const _persons = this.scheduleList.filter(item => item['id'] === String(year) + String(month + 1) + String(day))
-        return Object.assign(
-          {
-            day: day,
-            selected: selected,
-            persons: (_persons && _persons.length > 0) ? _persons[0]['persons'] : undefined
-          }
-        )
-      },
-      computedWeeks () {
-        let value = this.currentYear
-        if (this.currentMonth + 1 > 11) {
-          value++
-        }
-        return value
+        this.tables = Timer(new Date(this.currentYear, this.currentMonth, this.currentDay)).getWeeks();
       },
       // 选中日期
       select (k1, k2, child, e) {

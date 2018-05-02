@@ -1,5 +1,7 @@
+import calendar from './helper'
 import {padStart, prettyUnit, isNumber} from '../utils'
 import {
+  FESTIVAL,
   MILLISECONDS_A_WEEK,
   MILLISECONDS_A_DAY,
   MILLISECONDS_A_HOUR,
@@ -19,11 +21,11 @@ class Timer {
     return new Date(params)
   }
 
-  constructor (options) {
+  constructor (arg, festival = FESTIVAL) {
     /**
      * 原始时间戳
      */
-    this._date = Timer.getOriginDate(options);
+    this._date = Timer.getOriginDate(arg);
 
     /**
      * 是否为夏令时
@@ -83,38 +85,38 @@ class Timer {
      * @type {number}
      */
     this._ms = this._date.getMilliseconds();
+
+    /**
+     * 定义农历日期
+     * @type {{} & {lunar: {"1-1": string, "1-15": string, "2-2": string, "5-5": string, "7-7": string, "7-15": string, "8-15": string, "9-9": string, "10-1": string, "10-15": string, "12-8": string, "12-23": string}, gregorian: {"1-1": string, "2-14": string, "3-8": string, "3-12": string, "4-5": string, "5-1": string, "5-4": string, "6-1": string, "7-1": string, "8-1": string, "9-10": string, "10-1": string, "12-24": string, "12-25": string}}}
+     * @private
+     */
+    this._festival = Object.assign({}, FESTIVAL, festival);
   }
 
   /**
    * 获取当前天所在周
-   * @param time
    * @returns {Array}
    */
-  getWeeks (time) {
+  getWeeks () {
     const _weeks = [];
-    const _time = new Timer(time);
-    const currentDay = this.getWeek();
+    const _start = this.startOf('week');
     for (let _week = 0; _week < 7; _week++) {
-      let _day = this.getDay() - (currentDay - _week);
-      let _month = this.getMonth();
-      let _year = this.getYear();
-      if (!(_day > 0)) {
-        _month = _month - 1
-      }
-      if (!(_month >= 0)) {
-        _year = _year - 1
-      }
-      if (!(_day > 0)) {
-        _day = new Date(_year, _month + 1, 0).getDate() + _day;
-      }
-      // TODO 重新生成时间
+      let _next = _start.add(1 * _week, 'day');
       _weeks.push({
-        time: this.toObject(),
-        week: this.getWeek(),
-        isBefore: this.isSame(_time)
+        time: _next.toObject(),
+        week: _next.getWeek(),
+        order: _next.isBefore(this.startOf('date'), '') ? 'before' : (_next.isSame(this.startOf('date'), '') ? 'same' : 'after')
       })
     }
     return _weeks;
+  }
+
+  /**
+   * 获取当前时间所在月份的所有日期
+   */
+  getMonthDays () {
+
   }
 
   /**
@@ -130,7 +132,7 @@ class Timer {
    * @returns {number}
    */
   getMonth () {
-    return this._month;
+    return this._month + 1;
   }
 
   /**
@@ -187,6 +189,32 @@ class Timer {
    */
   getUnix () {
     return Math.floor(this.valueOf() / 1000)
+  }
+
+  /**
+   * 获取农历
+   * @returns {{lunar: *, isLunarFestival: boolean, isGregorianFestival: boolean}}
+   */
+  getLunar () {
+    const _year = this.getYear();
+    const _month = this.getMonth();
+    const _day = this.getDay();
+    const lunarInfo = calendar.solar2lunar(_year, _month, _day);
+    let lunarValue = lunarInfo.IDayCn
+    let isLunarFestival = false
+    let isGregorianFestival = false
+    if (this._festival.lunar[lunarInfo.lMonth + '-' + lunarInfo.lDay] !== undefined) {
+      lunarValue = this._festival.lunar[lunarInfo.lMonth + '-' + lunarInfo.lDay];
+      isLunarFestival = true
+    } else if (this._festival.gregorian[_month + '-' + _day] !== undefined) {
+      lunarValue = this._festival.gregorian[_month + '-' + _day];
+      isGregorianFestival = true
+    }
+    return {
+      lunar: lunarValue,
+      isLunarFestival: isLunarFestival,
+      isGregorianFestival: isGregorianFestival
+    }
   }
 
   /**
@@ -348,27 +376,30 @@ class Timer {
   /**
    * 判断时间是否相同
    * @param that
+   * @param precision
    * @returns {boolean}
    */
-  isSame (that) {
+  isSame (that, precision) {
     return this.valueOf() === that.valueOf()
   }
 
   /**
    * 判断是否为之前
    * @param that
+   * @param precision
    * @returns {boolean}
    */
-  isBefore (that) {
+  isBefore (that, precision) {
     return this.valueOf() < that.valueOf()
   }
 
   /**
    * 判断是否之后
    * @param that
+   * @param precision
    * @returns {boolean}
    */
-  isAfter (that) {
+  isAfter (that, precision) {
     return this.valueOf() > that.valueOf()
   }
 
@@ -394,13 +425,15 @@ class Timer {
    */
   toArray () {
     return [
-      this._year,
-      this._month,
-      this._day,
-      this._hours,
-      this._month,
-      this._seconds,
-      this._ms
+      this.getYear(),
+      this.getMonth(),
+      this.getWeek(),
+      this.getDay(),
+      this.getHour(),
+      this.getMinute(),
+      this.getSecond(),
+      this.getMillisecond(),
+      this.getLunar()
     ]
   }
 
@@ -418,13 +451,15 @@ class Timer {
    */
   toObject () {
     return {
-      years: this._year,
-      months: this._month,
-      week: this._day,
-      hours: this._hours,
-      minutes: this._minutes,
-      seconds: this._seconds,
-      milliseconds: this._ms
+      years: this.getYear(),
+      months: this.getMonth(),
+      week: this.getWeek(),
+      day: this.getDay(),
+      hours: this.getHour(),
+      minutes: this.getMinute(),
+      seconds: this.getSecond(),
+      milliseconds: this.getMillisecond(),
+      lunar: this.getLunar()
     }
   }
 

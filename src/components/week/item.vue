@@ -4,7 +4,7 @@
       <div class="week-items-li-title iconfont icon-xuanze1">
         白班
       </div>
-      <span class="edit-button iconfont icon-bianji" @click.stop="editItem(itemChild)"></span>
+      <span class="edit-button" @click.stop="editItem(itemChild)"></span>
       <ul class="person-list person-no-list" v-if="!checkHasPerson(itemChild.persons, true)">
         <li>无值班</li>
       </ul>
@@ -92,6 +92,7 @@
     height: 100%;
     padding: 10px;
     overflow: hidden;
+    box-sizing: border-box;
     .week-items-li {
       height: 50%;
       width: 100%;
@@ -105,7 +106,7 @@
         border-radius: 50%;
         text-align: center;
         line-height: 30px;
-        background-color: #1e9fff;
+        background: #1e9fff url("../../assets/icons/edit.svg") 5px 5px no-repeat;
         color: #ffffff;
         display: none;
       }
