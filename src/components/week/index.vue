@@ -7,7 +7,7 @@
           v-for="(week, index) in weeks"
           :key="index"
           class="week" :class="tables[index] && tables[index]['selected'] ? 'thead-selected' : ''">
-          <span>{{tables[index] && tables[index]['day']}}</span>
+          <span>{{tables[index] && tables[index]['time'] && tables[index]['time']['day']}}</span>
           <span>{{' ' + week}}</span>
         </td>
       </tr>
@@ -17,7 +17,7 @@
         <td
           v-for="(item, key) in tables"
           :key="key"
-          :class="{'selected': item.selected, 'disabled': item.disabled}"
+          :class="{'selected': selected.id === item.id, 'disabled': item.disabled}"
           @click="select(item, $event)">
           <vue-schedule-week-items :item-child="item"></vue-schedule-week-items>
         </td>
@@ -46,15 +46,21 @@
           return WEEKS
         }
       },
+      selected: {
+        type: Object,
+        default: function () {
+          const _time = Timer().startOf('date');
+          return {
+            id: _time.valueOf(),
+            time: _time.toObject()
+          }
+        }
+      },
       scheduleList: []
     },
     data () {
       return {
-        tables: [],
-        currentYear: 0, // 当前年份
-        currentMonth: 0, // 当前月份
-        currentWeek: 0, // 当前周数
-        currentDay: 0 // 当前日期
+        tables: []
       }
     },
     watch: {
@@ -66,34 +72,26 @@
       this.init()
     },
     methods: {
-      calcTimer () {
-        if (Array.isArray(this.value) && this.value.length > 0) {
-          this.currentYear = parseInt(this.value[0]);
-          this.currentMonth = parseInt(this.value[1]) - 1;
-          this.currentDay = parseInt(this.value[2]);
-        }
-      },
       init () {
         const now = new Date();
-        this.currentYear = now.getFullYear();
-        this.currentMonth = now.getMonth();
-        this.currentDay = now.getDate();
+        let currentYear = now.getFullYear();
+        let currentMonth = now.getMonth();
+        let currentDay = now.getDate();
         if (this.value.length > 0) {
-          this.currentYear = parseInt(this.value[0]);
-          this.currentMonth = parseInt(this.value[1]) - 1;
-          this.currentDay = parseInt(this.value[2]);
+          currentYear = parseInt(this.value[0]);
+          currentMonth = parseInt(this.value[1]) - 1;
+          currentDay = parseInt(this.value[2]);
         }
-        this.tables = Timer(new Date(this.currentYear, this.currentMonth, this.currentDay)).getWeeks();
+        const _weeks = Timer(new Date(currentYear, currentMonth, currentDay)).getWeeks();
+        this.tables = _weeks.map(_item => {
+          _item.selected = _item.order === 'same';
+          return _item;
+        })
       },
       // 选中日期
-      select (k1, k2, child, e) {
-        if (e !== undefined) e.stopPropagation()
-        this.currentDay = this.days[k1][k2].day
-        this.today = [k1, k2]
-        const clickDay = [this.currentYear, this.zero ? this.zeroPad(this.currentMonth + 1) : this.currentMonth + 1, this.zero ? this.zeroPad(this.days[k1][k2].day) : this.days[k1][k2].day]
-        if (child.addAble && (!child.persons || child.persons.length === 0)) { // 只有可添加的才能触发事件
-          this.$emit('select', clickDay, child)
-        }
+      select (item, e) {
+        if (e !== undefined) e.stopPropagation();
+        this.$emit('select', item);
       }
     },
     components: {

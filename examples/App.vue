@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <vue-schedule-week :type="'week'"></vue-schedule-week>
+    <vue-schedule-week :type="'week'" @select="select" :selected="selected"></vue-schedule-week>
   </div>
 </template>
 <script>
@@ -8,7 +8,17 @@ import Timer from '../src/utils/date'
 window.Timer = Timer
 export default {
   name: 'App',
+  data () {
+    return {
+      selected: {}
+    }
+  },
   mounted () {
+  },
+  methods: {
+    select (item) {
+      this.selected = item;
+    }
   },
   components: {
   }

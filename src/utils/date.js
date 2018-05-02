@@ -104,6 +104,7 @@ class Timer {
     for (let _week = 0; _week < 7; _week++) {
       let _next = _start.add(1 * _week, 'day');
       _weeks.push({
+        id: _next.valueOf(),
         time: _next.toObject(),
         week: _next.getWeek(),
         order: _next.isBefore(this.startOf('date'), '') ? 'before' : (_next.isSame(this.startOf('date'), '') ? 'same' : 'after')
