@@ -1,17 +1,17 @@
 <template>
   <div class="vue-schedule-week-items">
     <div class="week-items-li">
-      <div class="week-items-li-title iconfont icon-xuanze1">
-        白班
+      <div class="week-items-li-title icon-day">
+        上午
       </div>
-      <span class="edit-button" @click.stop="editItem(itemChild)"></span>
-      <ul class="person-list person-no-list" v-if="!checkHasPerson(itemChild.persons, true)">
-        <li>无值班</li>
+      <span class="edit-button" @click.stop="editItem(item)"></span>
+      <ul class="person-list person-no-list" v-if="!checkHasPerson(item.list, true)">
+        <li>无安排</li>
       </ul>
       <ul class="person-list">
         <li
           class="person-list-list"
-          v-for="(person, key) in itemChild.persons"
+          v-for="(person, key) in item.list"
           :key="key"
           v-if="person.isDayTour">
           <div>
@@ -26,16 +26,16 @@
       </ul>
     </div>
     <div class="week-items-li">
-      <div class="week-items-li-title iconfont icon-star">
-        夜班
+      <div class="week-items-li-title icon-night">
+        夜晚
       </div>
-      <ul class="person-list person-no-list" v-if="!checkHasPerson(itemChild.persons, false)">
-        <li>无值班</li>
+      <ul class="person-list person-no-list" v-if="!checkHasPerson(item.list, false)">
+        <li>无安排</li>
       </ul>
       <ul class="person-list" v-else>
         <li
           class="person-list-list"
-          v-for="(person, key) in itemChild.persons"
+          v-for="(person, key) in item.list"
           :key="key"
           v-if="!person.isDayTour">
           <div>
@@ -56,7 +56,7 @@
   export default {
     name: 'vue-schedule-week-items',
     props: {
-      itemChild: {
+      item: {
         type: Object,
         default: function () {
           return {}
@@ -106,16 +106,18 @@
         border-radius: 50%;
         text-align: center;
         line-height: 30px;
-        background: #1e9fff url("../../assets/icons/edit.svg") 5px 5px no-repeat;
+        background: #1e9fff url("../../assets/icons/edit.svg") 6px 6px no-repeat;
         color: #ffffff;
         display: none;
       }
-      .icon-guangquanfangda {
+      .icon-day {
+        background: url("../../assets/icons/day.svg") 6px 10px no-repeat;
         &:before {
           color: #f5cb37;
         }
       }
-      .icon-wuye {
+      .icon-night {
+        background: url("../../assets/icons/night.svg") 6px 10px no-repeat;
         &:before {
           color: #20a0ff;
         }
@@ -128,6 +130,8 @@
         width: 100%;
         height: calc(100% - 40px);
         padding: 10px;
+        box-sizing: border-box;
+        list-style: none;
         &-list {
           line-height: 20px;
           height: 48px;
@@ -160,6 +164,7 @@
         font-size: 14px;
         height: 40px;
         line-height: 40px;
+        padding-left: 30px;
         &:before {
           font-size: 18px;
           padding: 0 6px;

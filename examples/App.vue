@@ -1,16 +1,40 @@
 <template>
   <div id="app">
-    <vue-schedule-week :type="'week'" @select="select" :selected="selected"></vue-schedule-week>
+    <vue-schedule-week
+      @select="select"
+      :selected="selected"
+      :schedule-list="scheduleList"></vue-schedule-week>
   </div>
 </template>
 <script>
 import Timer from '../src/utils/date'
-window.Timer = Timer
 export default {
   name: 'App',
   data () {
+    const _time = Timer().startOf('date');
     return {
-      selected: {}
+      selected: {
+        id: _time.valueOf(),
+        time: _time.toObject()
+      },
+      scheduleList: [
+        {
+          id: _time.valueOf(),
+          isDayTour: true,
+          name: 'sakitam-fdd',
+          role: '管理员',
+          phone: '12345678',
+          unit: 'XXX'
+        },
+        {
+          id: _time.valueOf(),
+          isDayTour: false,
+          name: 'sakitam-fdd',
+          role: '管理员',
+          phone: '12345678',
+          unit: 'XXX'
+        }
+      ]
     }
   },
   mounted () {

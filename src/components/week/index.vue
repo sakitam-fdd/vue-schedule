@@ -6,7 +6,8 @@
         <td
           v-for="(week, index) in weeks"
           :key="index"
-          class="week" :class="tables[index] && tables[index]['selected'] ? 'thead-selected' : ''">
+          class="week"
+          :class="tables[index] && tables[index]['id'] === selected.id ? 'thead-selected' : ''">
           <span>{{tables[index] && tables[index]['time'] && tables[index]['time']['day']}}</span>
           <span>{{' ' + week}}</span>
         </td>
@@ -19,7 +20,7 @@
           :key="key"
           :class="{'selected': selected.id === item.id, 'disabled': item.disabled}"
           @click="select(item, $event)">
-          <vue-schedule-week-items :item-child="item"></vue-schedule-week-items>
+          <vue-schedule-week-items :item="item"></vue-schedule-week-items>
         </td>
       </tr>
       </tbody>
@@ -56,7 +57,12 @@
           }
         }
       },
-      scheduleList: []
+      scheduleList: {
+        type: Array,
+        default: function () {
+          return []
+        }
+      }
     },
     data () {
       return {
@@ -85,6 +91,7 @@
         const _weeks = Timer(new Date(currentYear, currentMonth, currentDay)).getWeeks();
         this.tables = _weeks.map(_item => {
           _item.selected = _item.order === 'same';
+          _item.list = this.scheduleList.filter(list => list.id === _item.id);
           return _item;
         })
       },
