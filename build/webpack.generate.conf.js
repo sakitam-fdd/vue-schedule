@@ -16,6 +16,9 @@ utils.setSourceMap(true);
 
 const webpackConfig = merge(require('./webpack.base.conf'), {
   mode: 'production',
+  entry: {
+    app: './examples/main.js'
+  },
   module: {
     rules: utils.styleLoaders({
       sourceMap: true,
@@ -28,7 +31,7 @@ const webpackConfig = merge(require('./webpack.base.conf'), {
     path: path.resolve(__dirname, '../demoDist'),
     filename: utils.assetsPath('scripts/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('scripts/[id].[chunkhash].js'),
-    publicPath: '/',
+    publicPath: './',
     library: undefined,
     libraryTarget: 'var',
     umdNamedDefine: false
